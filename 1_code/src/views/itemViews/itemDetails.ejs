@@ -1,0 +1,167 @@
+<link rel="stylesheet" href="/css/item-details.css">
+
+
+<%- include('partials/deleteItemModal.ejs') %>
+    <%- include('partials/updateItemModal.ejs') %>
+        <%- include('partials/qrCodeModal.ejs') %>
+
+            <div class="container">
+                <div class="py-2 text-center">
+                    <h1 id="title">Rental Item Details</h1>
+                    <p class="text-center lead">
+                        <%=viewModel.rentalItem.rentalItemGuid%>
+                    </p>
+                </div>
+            </div>
+            <div class="container summary-container">
+                <div class="row py-3">
+                    <div class="col-md-4 order-md-2">
+                        <div class="row justify-content-center">
+                            <div class="mb-3 dropdown text-center">
+                                <button class="btn btn-outline-secondary dropdown-toggle" type="button"
+                                    id="dropdownMenuButton" data-bs-toggle="dropdown" aria-haspopup="true"
+                                    aria-expanded="false">
+                                    <i class="fa-solid fa-wrench"></i> Actions
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <button class="dropdown-item text-info" id="edit-item-btn"
+                                            data-bs-toggle="modal" data-bs-target="#update-item-modal">
+                                            <i class="fa-solid fa-pen-to-square"></i> Edit Item
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item text-danger" id="delete-media-btn"
+                                            data-bs-toggle="modal" data-bs-target="#delete-confirmation-modal">
+                                            <i class="fa-solid fa-trash"></i> Delete Item
+                                        </button>
+                                    </li>
+                                    <li>
+                                        <button class="dropdown-item text-info" id="diplay-qrcode-btn"
+                                            data-bs-toggle="modal" data-bs-target="#display-qrcode-modal">
+                                            <i class="fa-solid fa-qrcode"></i> Show QR-Code
+                                        </button>
+                                    </li>
+                                    <% if(viewModel.rentalItem.isCheckedOut) { %>
+                                        <li>
+                                            <a href="<%= '/rentalagreement/checkin?rentalItemId=' + viewModel.rentalItem.rentalItemGuid%>" class="dropdown-item text-success">
+                                                <i class="fa-solid fa-arrow-turn-down"></i> Check In
+                                            </a>
+                                        </li>
+                                        <% } else { %>
+                                            <li>
+                                                <a href="<%= '/rentalagreement/checkout?rentalItemId=' + viewModel.rentalItem.rentalItemGuid%>"
+                                                    class="dropdown-item text-success">
+                                                    <i class="fa-solid fa-arrow-turn-up"></i> Check Out
+                                                </a>
+                                            </li>
+                                            <% } %>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-md-8 order-md-1">
+                        <div class="row align-items-center">
+                            <div class="col-md-4 col-lg-3">
+                                Item Name:
+                            </div>
+                            <div class="col-md-8 detail-text mb-2">
+                                <a href="<%=" /media/"+viewModel.rentalItem.id%>"><%=viewModel.rentalItem.name%></a>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-md-4 col-lg-3">
+                                Item Type:
+                            </div>
+                            <div class="col-md-8 detail-text mb-2">
+                                <%=viewModel.rentalItem.itemType%>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-md-4 col-lg-3">
+                                Rental Item ID:
+                            </div>
+                            <div class="col-md-8 detail-text mb-2">
+                                <%=viewModel.rentalItem.rentalItemGuid%>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-md-4 col-lg-3">
+                                Is on hold?
+                            </div>
+                            <div class="col-md-8 detail-text mb-2">
+                                <%=viewModel.rentalItem.isOnHold? "Yes" : "No" %>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-md-4 col-lg-3">
+                                Is checked out?
+                            </div>
+                            <div class="col-md-8 detail-text mb-2">
+                                <%=viewModel.rentalItem.isCheckedOut? "Yes" : "No" %>
+                            </div>
+                        </div>
+                        <div class="row align-items-center">
+                            <div class="col-md-4 col-lg-3">
+                                Condition:
+                            </div>
+                            <div class="col-md-8 detail-text mb-2">
+                                <%=viewModel.rentalItem.itemCondition%>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="container copies-container py-4">
+                    <div class="row mb-2">
+                        <div class="col text-center">
+                            <h4>Transaction History of Copy: <%=viewModel.rentalItem.rentalItemGuid%>
+                            </h4>
+                        </div>
+                    </div>
+                    <table class="table table-bordered" id="transaction-history-table">
+                        <thead>
+                            <tr>
+                                <th scope="col">Rental Date</th>
+                                <th scope="col">Return Due Date</th>
+                                <th scope="col">Actual Return Date</th>
+                                <th scope="col">Member</th>
+                                <th scope="col">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <% if (!viewModel?.rentalAgreements || viewModel?.rentalAgreements?.length==0) { %>
+                                <tr>
+                                    <td colspan="5" class="text-center">No transaction history</td>
+                                </tr>
+                                <%} %>
+                                    <% for (let rentalAgreement of viewModel?.rentalAgreements) { %>
+
+                                        <tr>
+                                            <td scope="col">
+                                                <%=rentalAgreement.checkoutDate.toLocaleDateString('en-US')%>
+                                            </td>
+
+                                            <td scope="col" class="<%= rentalAgreement.isPastDue ? 'text-danger': ''%>">
+                                                <%=rentalAgreement.checkinDueDate.toLocaleDateString('en-US')%>
+                                            </td>
+                                            <td scope="col" class="<%= rentalAgreement.isPastDue ? 'text-danger': ''%>">
+                                                <%= rentalAgreement.actualCheckinDate==null ? "Not returned" :
+                                                    rentalAgreement.actualCheckinDate.toLocaleDateString('en-US') %>
+                                            </td>
+
+
+                                            <td class="col">
+                                                <%= rentalAgreement.borrowerName %>
+                                            </td>
+
+
+                                            <td class="col">None</td>
+                                        </tr>
+
+                                        <% } %>
+
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            <script src="/js/item-details.js"></script>
